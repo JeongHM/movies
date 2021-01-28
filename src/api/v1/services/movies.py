@@ -17,11 +17,11 @@ class MoviesService(object):
         self._body = body
         self._connection = connection()
 
-    def get_all_movies(self) -> (bool, str, str or list):
+    def get_all_movies(self) -> (bool, str, str or list, int):
         """
         get all movies (select all movie object in database)
             MoviesServices().get_all_movies()
-        :return: (bool, str or list[dict, dict, ...])
+        :return: result(bool), code(str), error or result object, status_code
         """
         try:
             sql = "SELECT * FROM movies"
@@ -33,17 +33,20 @@ class MoviesService(object):
 
                 items = {"movies": [dict(row) for row in query.fetchall()]}
 
+                if not items["movies"]:
+                    return None, "NO_CONTENT", None, 204
+
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e
+            return False, "BAD_REQUEST", e, 400
 
-        return True, "SUCCESS", items
+        return True, "SUCCESS", items, 200
 
-    def post_movie(self) -> (bool, str, str or list):
+    def post_movie(self) -> (bool, str, str or list, int):
         """
         create movie object (insert object to database)
             MoviesServices().post_movie()
-        :return: (bool, str)
+        :return: result(bool), code(str), error or result object, status_code
         """
         try:
             sql = "INSERT INTO movies (name, genre, grade, release_at, views) " \
@@ -58,15 +61,15 @@ class MoviesService(object):
                 conn.commit()
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e
+            return False, "BAD_REQUEST", e, 400
 
-        return True, "SUCCESS", None
+        return True, "SUCCESS", None, 200
 
-    def put_movie(self) -> (bool, str):
+    def put_movie(self) -> (bool, str, str or list, int):
         """
         update movie object (update object to database)
             MoviesServices().put_movie()
-        :return: (bool, str)
+        :return: result(bool), code(str), error or result object, status_code
         """
         try:
             pass
@@ -77,26 +80,32 @@ class MoviesService(object):
 
         return True, True
 
-    def delete_movie(self) -> (bool, str):
+    def delete_movie(self) -> (bool, str, str or list, int):
         """
         delete movie object (delete object to database)
             MoviesServices().delete_movie()
-        :return: (bool, str)
+        :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            pass
+            sql = "DELETE FROM movies"
+
+            with self._connection as conn:
+                cursor = conn.cursor()
+                cursor.execute(sql)
+
+                conn.commit()
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, None
+            return False, "BAD_REQUEST", e, 400
 
-        return True, True
+        return True, "SUCCESS", None, 200
 
-    def get_specific_movie(self) -> (bool, str):
+    def get_specific_movie(self) -> (bool, str, str or list, int):
         """
         get specific movie object (select specific movie object in database)
             MoviesServices().get_specific_movie()
-        :return: (bool, str)
+        :return: result(bool), code(str), error or result object, status_code
         """
         try:
             sql = "SELECT * FROM movies WHERE id = ?"
@@ -112,6 +121,6 @@ class MoviesService(object):
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e
+            return False, "BAD_REQUEST", e, 400
 
-        return True, "SUCCESS", item
+        return True, "SUCCESS", item, 200

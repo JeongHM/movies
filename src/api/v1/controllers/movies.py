@@ -13,32 +13,29 @@ movies_blueprint = Blueprint(name="movies", import_name=__name__)
                         endpoint="movies")
 @response_object_formatting
 def movies():
+    result, code, message, status = None, None, None, None
+
     param = dict(request.args) if request.args else None
     body = request.get_json()
 
     service = MoviesService(param=param, body=body)
 
     if request.method == "GET":
-        result, code, message = service.get_all_movies()
-
-        if not result:
-            return RESPONSE_CODE[code], None, message, 400
-
-        return RESPONSE_CODE[code], message, None, 200
+        result, code, message, status = service.get_all_movies()
 
     elif request.method == "POST":
-        result, code, message = service.post_movie()
-
-        if not result:
-            return RESPONSE_CODE[code], None, message, 400
-
-        return RESPONSE_CODE["CREATED"], None, None, 201
+        result, code, message, status = service.post_movie()
 
     elif request.method == "PUT":
         pass
 
     else:
-        pass
+        result, code, message, status = service.delete_movie()
+
+    if not result:
+        return RESPONSE_CODE[code], None, message, status
+
+    return RESPONSE_CODE[code], message, None, status
 
 
 @movies_blueprint.route(rule="/<movie_id>",

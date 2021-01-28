@@ -7,10 +7,10 @@ def response_object_formatting(func):
     def wrapper(*args, **kwargs):
         res, result, errors, status = func(*args, **kwargs)
 
-        if result:
+        if result or errors:
             res_copy = deepcopy(res)
-            res_copy["result"] = result
-            res_copy["errors"] = errors
+            res_copy["result"] = result if result else {}
+            res_copy["errors"] = errors if errors else {}
             res = res_copy
 
         resp = json.dumps(obj=res,

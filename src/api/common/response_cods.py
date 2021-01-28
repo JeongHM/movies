@@ -11,6 +11,9 @@ RESPONSE_CODE = {
     "NO_CONTENT": {
         "message": "No Content"
     },
+    "NOT_FOUND": {
+        "message": "Not Found"
+    },
     "BAD_REQUEST": {
         "message": "Bad Request"
     },

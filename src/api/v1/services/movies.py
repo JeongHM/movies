@@ -48,7 +48,6 @@ class MoviesService(object):
             MoviesServices().post_movie()
         :return: result(bool), code(str), error or result object, status_code
         """
-        # TODO: Conflict 추가
         try:
             sql = "INSERT INTO movies (name, genre, grade, release_at, views) " \
                   "VALUES (:name, :genre, :grade, :release_at, :views)"
@@ -58,6 +57,11 @@ class MoviesService(object):
                 cursor.execute(sql, self._body)
 
                 conn.commit()
+
+        except sqlite3.IntegrityError as e:
+            current_app.logger.error(e)
+            return False, "CONFLICT", e, 409
+
         except Exception as e:
             current_app.logger.error(e)
             return False, "BAD_REQUEST", e, 400
@@ -108,7 +112,7 @@ class MoviesService(object):
         """
         try:
             sql = "SELECT * FROM movies WHERE movies.id = :movie_id"
-            parameter = (self._param.get("movie_id"), )
+
             with self._connection as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()

@@ -48,15 +48,14 @@ class MoviesService(object):
             MoviesServices().post_movie()
         :return: result(bool), code(str), error or result object, status_code
         """
+        # TODO: Conflict 추가
         try:
             sql = "INSERT INTO movies (name, genre, grade, release_at, views) " \
-                  "VALUES (?, ?, ?, ?, ?)"
-            parameters = self._body.values()
+                  "VALUES (:name, :genre, :grade, :release_at, :views)"
 
             with self._connection as conn:
                 cursor = conn.cursor()
-                cursor.execute(sql,
-                               tuple(parameters))
+                cursor.execute(sql, self._body)
 
                 conn.commit()
         except Exception as e:
@@ -108,16 +107,19 @@ class MoviesService(object):
         :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            sql = "SELECT * FROM movies WHERE id = ?"
-            parameter = self._param.get("movie_id")
-
+            sql = "SELECT * FROM movies WHERE movies.id = :movie_id"
+            parameter = (self._param.get("movie_id"), )
             with self._connection as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
-                query = cursor.execute(sql,
-                                       parameter)
 
-                item = dict(query.fetchone())
+                query = cursor.execute(sql, self._param)
+                row = query.fetchone()
+
+                if not row:
+                    return None, "NO_CONTENT", None, 204
+
+                item = {"movie": dict(row)}
 
         except Exception as e:
             current_app.logger.error(e)

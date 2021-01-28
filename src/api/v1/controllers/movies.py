@@ -38,9 +38,17 @@ def movies():
     return RESPONSE_CODE[code], message, None, status
 
 
-@movies_blueprint.route(rule="/<movie_id>",
+@movies_blueprint.route(rule="/<int:movie_id>",
                         methods=["GET"],
                         endpoint="get_specific_movie")
 @response_object_formatting
-def get_specific_movie(movie_id: str):
-    pass
+def get_specific_movie(movie_id: int):
+    param = {"movie_id": movie_id}
+
+    service = MoviesService(param=param)
+    result, code, message, status = service.get_specific_movie()
+
+    if not result:
+        return RESPONSE_CODE[code], None, message, status
+
+    return RESPONSE_CODE[code], message, None, status

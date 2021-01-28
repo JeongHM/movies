@@ -129,6 +129,23 @@ class MoviesControllerTest(unittest.TestCase):
         """
         pass
 
+    def test_post_movies_conflict(self):
+        """
+        Test Movies Controller 409 Response
+            [POST] http://127.0.0.1:5050/api/v1/movies
+        :return:
+        """
+        data = self._movie_data
+        data["name"] = "new world"
+
+        self.request_post(data=data, path=CONSTANTS["V1_MOVIE_API"])
+
+        post_req = self.request_post(data=data,
+                                     path=CONSTANTS["V1_MOVIE_API"])
+
+        post_status_code = post_req.status_code
+        self.assertEqual(409, post_status_code)
+
     def test_put_movies_success(self):
         """
         Test Movies Controller 200 Response
@@ -159,7 +176,16 @@ class MoviesControllerTest(unittest.TestCase):
             [DELETE] http://127.0.0.1:5050/api/v1/movies/{movie_id}
         :return:
         """
-        pass
+        get_req = self.request_get(path=CONSTANTS["V1_MOVIE_API"])
+        resp = get_req.json()
+
+        movie_ids = [str(movie.get("id")) for movie in resp["result"]["movies"]]
+        movie_id = choice(movie_ids)
+
+        req = self.request_get(path=CONSTANTS["V1_MOVIE_API"] + "/" + movie_id)
+        status_code = req.status_code
+
+        self.assertEqual(200, status_code)
 
     def test_get_specific_movies_no_content(self):
         """
@@ -167,4 +193,18 @@ class MoviesControllerTest(unittest.TestCase):
             [DELETE] http://127.0.0.1:5050/api/v1/movies/{movie_id}
         :return:
         """
-        pass
+        get_req = self.request_get(path=CONSTANTS["V1_MOVIE_API"])
+        resp = get_req.json()
+
+        movie_ids = [
+            str(movie.get("id")) + "123" for movie in resp["result"]["movies"]
+        ]
+
+        movie_id = choice(movie_ids)
+        req = self.request_get(path=CONSTANTS["V1_MOVIE_API"] + "/" + movie_id)
+        status_code = req.status_code
+
+        self.assertEqual(204, status_code)
+
+if __name__ == '__main__':
+    unittest.main()

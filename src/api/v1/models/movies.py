@@ -21,7 +21,7 @@ class MoviesModel(object):
             CREATE TABLE IF NOT EXISTS movies (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 name        VARCHAR(255) ,
-                genre       VARCHAR(50 NOT NULL,
+                genre       VARCHAR(50) NOT NULL,
                 grade       INTEGER NOT NULL,
                 views       INTEGER DEFAULT 0,
                 release_at  TEXT NOT NULL,

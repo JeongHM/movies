@@ -1,5 +1,5 @@
 import logging
-from flask import Flask
+from flask import Flask, request, current_app
 from flask_cors import CORS
 from logging.handlers import RotatingFileHandler
 
@@ -48,6 +48,16 @@ def create_app():
 
 
 application = create_app()
+
+
+@application.before_request
+def before_request():
+    method = request.method
+    url = request.url
+    params = request.args if request.args else None
+    body = request.json if request.json else None
+
+    current_app.logger.info(f'[{method}] {url} params: {params} body: {body}')
 
 
 @application.errorhandler(404)

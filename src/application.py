@@ -1,5 +1,7 @@
+import logging
 from flask import Flask
 from flask_cors import CORS
+from logging.handlers import RotatingFileHandler
 
 from src.api.v1.models.movies import MoviesModel
 from src.api.common.constants import CONSTANTS
@@ -14,6 +16,22 @@ def create_app():
     """
     # Set Flask App
     app = Flask(import_name=__name__)
+
+    # Set Logging
+    logger = logging.getLogger(name=__name__)
+    logger.setLevel(level=logging.INFO)
+    logger_format = "[%(asctime)s] %(pathname)s:%(lineno)d  %(message)s"
+    logger_formatter = logging.Formatter(fmt=logger_format)
+    logger_handler = RotatingFileHandler(filename="application.log",
+                                         mode="a",
+                                         maxBytes=1024 * 1024 * 3,
+                                         backupCount=3,
+                                         encoding="utf-8")
+    logger_handler.setFormatter(fmt=logger_formatter)
+    logger.addHandler(hdlr=logger_handler)
+
+    app.logger.addHandler(hdlr=logger_handler)
+    app.logger.setLevel(level=logging.INFO)
 
     # Set Blueprint
     from src.api.v1.controllers.movies import movies_blueprint

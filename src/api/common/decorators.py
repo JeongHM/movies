@@ -10,7 +10,15 @@ def response_object_formatting(func):
         if result or errors:
             res_copy = deepcopy(res)
             res_copy["result"] = result if result else {}
-            res_copy["errors"] = errors if errors else {}
+            res_copy["errors"] = errors if errors else []
+
+            if errors:
+                error = {
+                    "user_message": str(errors).split(":")[0],
+                    "internal_message": str(errors).split(":")[1]
+                }
+                res_copy["errors"] = error
+
             res = res_copy
 
         resp = json.dumps(obj=res,

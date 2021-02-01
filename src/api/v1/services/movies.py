@@ -82,6 +82,11 @@ class MoviesService(object):
 
             movies = self._body["movies"]
 
+            movie_names = [movie.get("name") for movie in movies]
+
+            if len(movie_names) != len(set(movie_names)):
+                raise KeyError('Duplicate Key Error: movie.name')
+
             with self._connection as conn:
                 cursor = conn.cursor()
 
@@ -89,6 +94,10 @@ class MoviesService(object):
                     cursor.execute(sql, movie)
 
             conn.commit()
+
+        except KeyError as e:
+            current_app.logger.error(e)
+            return False, "CONFLICT", e, 409
 
         except Exception as e:
             current_app.logger.error(e)

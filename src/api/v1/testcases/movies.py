@@ -46,8 +46,13 @@ class MoviesControllerTest(unittest.TestCase):
 
         return req
 
-    def request_put(self):
-        pass
+    def request_put(self, data: dict, path: str = None):
+        url = self._host if not path else self._host + path
+        req = requests.put(url=url,
+                           data=json.dumps(data),
+                           headers=self._headers)
+
+        return req
 
     def request_delete(self, path: str = None):
         """
@@ -152,7 +157,16 @@ class MoviesControllerTest(unittest.TestCase):
             [PUT] http://127.0.0.1:5050/api/v1/movies
         :return:
         """
-        pass
+        data = self._movie_data
+        movies = {
+            "movies": [data, data]
+        }
+
+        put_req = self.request_put(data=movies,
+                                   path=CONSTANTS["V1_MOVIE_API"])
+
+        put_status_code = put_req.status_code
+        self.assertEqual(409, put_status_code)
 
     def test_delete_movies_success(self):
         """

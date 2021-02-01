@@ -6,7 +6,7 @@ from src.api.v1.models import connection
 
 
 class MoviesService(object):
-    def __init__(self, param: dict = None, body: dict = None) -> None:
+    def __init__(self, param: dict = None, body: dict or list = None) -> None:
         """
         Set request parameter or body
             class_name = MoviesServices(param=param, body=body)
@@ -75,13 +75,26 @@ class MoviesService(object):
         :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            pass
+            sql = "UPDATE movies " \
+                  "SET genre = :genre, grade = :grade, release_at = " \
+                  ":release_at, views = :views " \
+                  "WHERE name = :name;"
+
+            movies = self._body["movies"]
+
+            with self._connection as conn:
+                cursor = conn.cursor()
+
+                for movie in movies:
+                    cursor.execute(sql, movie)
+
+            conn.commit()
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, None
+            return False, "BAD_REQUEST", e, 400
 
-        return True, True
+        return True, "SUCCESS", None, 200
 
     def delete_movie(self) -> (bool, str, str or list, int):
         """

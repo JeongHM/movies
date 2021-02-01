@@ -27,7 +27,7 @@ def movies():
         result, code, message, status = service.post_movie()
 
     elif request.method == "PUT":
-        pass
+        result, code, message, status = service.put_movie()
 
     else:
         result, code, message, status = service.delete_movie()

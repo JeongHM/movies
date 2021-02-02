@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, request, current_app
+from flask import Flask, request, current_app, abort
 from flask_cors import CORS
 from logging.handlers import RotatingFileHandler
 
@@ -57,7 +57,14 @@ def before_request():
     params = request.args if request.args else None
     body = request.json if request.json else None
 
-    current_app.logger.info(f'[{method}] {url} params: {params} body: {body}')
+    if method != "OPTIONS":
+        accepts = request.headers.get("Accept")
+
+        if "*/*" in accepts or "application/json" in accepts:
+            current_app.logger.info(
+                f'[{method}] {url} params: {params} body: {body}')
+        else:
+            abort(406)
 
 
 @application.errorhandler(404)
@@ -66,5 +73,17 @@ def not_found_error(e):
     return RESPONSE_CODE["NOT_FOUND"], None, e, 404
 
 
+@application.errorhandler(405)
+@response_object_formatting
+def method_not_allow(e):
+    return RESPONSE_CODE["NOT_ALLOW"], None, e, 405
+
+
+@application.errorhandler(406)
+@response_object_formatting
+def method_not_allow(e):
+    return RESPONSE_CODE["NOT_ACCEPT"], None, e, 406
+
+
 if __name__ == '__main__':
-    application.run(host="0.0.0.0", port="5050", debug=False)
+    application.run(host="0.0.0.0", port="5050", debug=True)

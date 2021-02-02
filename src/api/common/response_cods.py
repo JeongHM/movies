@@ -14,6 +14,12 @@ RESPONSE_CODE = {
     "NOT_FOUND": {
         "message": "Not Found"
     },
+    "NOT_ACCEPT": {
+        "message": "Not Accept"
+    },
+    "NOT_ALLOW": {
+        "message": "Not Allow"
+    },
     "BAD_REQUEST": {
         "message": "Bad Request"
     },

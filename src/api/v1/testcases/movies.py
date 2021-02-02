@@ -123,6 +123,7 @@ class MoviesControllerTest(unittest.TestCase):
         last_movie = resp["result"]["movies"][-1]
         del last_movie["id"]
         del last_movie["created_at"]
+        del last_movie["link"]
 
         self.assertEqual(self._movie_data, last_movie)
 
@@ -219,6 +220,22 @@ class MoviesControllerTest(unittest.TestCase):
         status_code = req.status_code
 
         self.assertEqual(204, status_code)
+
+    def test_not_accept_error_handler(self):
+        """
+        Test Not Accept Error Handler
+            [Method] http://127.0.0.1:5050/api/v1/movies
+            [Headers] Accept: images/*
+        :return:
+        """
+
+        req = requests.get(url=self._host + CONSTANTS["V1_MOVIE_API"],
+                           headers={"Accept": "image/*"})
+        status_code = req.status_code
+
+        self.assertEqual(406, status_code)
+
+
 
 if __name__ == '__main__':
     unittest.main()

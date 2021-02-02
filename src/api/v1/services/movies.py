@@ -1,5 +1,5 @@
 import sqlite3
-from flask import current_app
+from flask import current_app, request
 
 
 from src.api.v1.models import connection
@@ -25,13 +25,24 @@ class MoviesService(object):
         """
         try:
             sql = "SELECT * FROM movies"
+            items = {"movies": None}
 
             with self._connection as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 query = cursor.execute(sql)
 
-                items = {"movies": [dict(row) for row in query.fetchall()]}
+                movies = list()
+
+                for row in query.fetchall():
+                    movie = dict(row)
+                    movie["link"] = {
+                        "rel": "self",
+                        "href": request.url + "/" + str(movie.get("id"))
+                    }
+
+                    movies.append(movie)
+                items["movies"] = movies
 
                 if not items["movies"]:
                     return None, "NO_CONTENT", None, 204
@@ -56,6 +67,12 @@ class MoviesService(object):
                 cursor = conn.cursor()
                 cursor.execute(sql, self._body)
 
+                item = {
+                    "link": {
+                        "rel": "self",
+                        "href": request.url + "/" + str(cursor.lastrowid)
+                    }
+                }
                 conn.commit()
 
         except sqlite3.IntegrityError as e:
@@ -66,7 +83,7 @@ class MoviesService(object):
             current_app.logger.error(e)
             return False, "BAD_REQUEST", e, 400
 
-        return True, "SUCCESS", None, 200
+        return True, "SUCCESS", item, 200
 
     def put_movie(self) -> (bool, str, str or list, int):
         """

@@ -1,0 +1,382 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "movies",
+    "version": "0.0.1",
+    "description": "movies project"
+  },
+  "servers": [
+    {
+      "url": "{protocol}://{domain}:{port}/api/{version}",
+      "variables": {
+        "protocol": {
+          "enum": [
+            "http",
+            "https"
+          ],
+          "default": "http"
+        },
+        "domain": {
+          "enum": [
+            "127.0.0.1"
+          ],
+          "default": "127.0.0.1"
+        },
+        "port": {
+          "enum": [
+            "5050"
+          ],
+          "default": "5050"
+        },
+        "version": {
+          "enum": [
+            "v1"
+          ],
+          "default": "v1"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "movies",
+      "description": "movies"
+    }
+  ],
+  "paths": {
+    "/movies": {
+      "get": {
+        "tags": [
+          "movies"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMoives"
+          },
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "movies"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/movie"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PostMovie"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "movies"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movies": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/movie"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "movies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/movies/{movie_id}": {
+      "get": {
+        "tags": [
+          "movies"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/movie_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "movie": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "신세계"
+          },
+          "genre": {
+            "type": "string",
+            "example": "action"
+          },
+          "grade": {
+            "type": "integer",
+            "example": 19
+          },
+          "release_at": {
+            "type": "string",
+            "format": "date",
+            "example": "2013-08-01"
+          },
+          "views": {
+            "type": "integer",
+            "example": 4689161
+          }
+        }
+      },
+      "NotFound": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "result": {
+            "type": "object",
+            "example": {}
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Conflict"
+          },
+          "result": {
+            "type": "object",
+            "example": {}
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "NotAllow": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Not Allow"
+          },
+          "result": {
+            "type": "object",
+            "example": {}
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "user_message": {
+            "type": "string"
+          },
+          "internal_message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "movie_id": {
+        "in": "path",
+        "name": "movie_id",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "responses": {
+      "GetMoives": {
+        "description": "success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "result": {
+                  "type": "object",
+                  "properties": {
+                    "movies": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/movie"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PostMovie": {
+        "description": "success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "result": {
+                  "type": "object",
+                  "properties": {
+                    "link": {
+                      "type": "object",
+                      "properties": {
+                        "rel": {
+                          "type": "string",
+                          "example": "self"
+                        },
+                        "href": {
+                          "type": "string",
+                          "example": "http://127.0.0.1:5050/api/v1/movies/8"
+                        }
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotFound"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "The specified resource was exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Conflict"
+            }
+          }
+        }
+      },
+      "NotAllow": {
+        "description": "The method is not allowed for the requested URL.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotAllow"
+            }
+          }
+        }
+      },
+      "Empty": {
+        "description": "The resource is Empty"
+      }
+    }
+  }
+}

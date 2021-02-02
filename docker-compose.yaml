@@ -10,3 +10,14 @@ services:
     ports:
       - "5050:5050"
     command: sh -c "FLASK_APP=src/application.py FLASK_DEBUG=1 flask run --port 5050 --host 0.0.0.0"
+
+  swaggaer:
+    container_name: movie-swagger
+    build:
+      context: .
+      dockerfile: dockerfiles/swagger.dockerfile
+    volumes:
+      - ./:/home
+    ports:
+      - "3030:3030"
+    command: sh -c "node swagger/index.js"

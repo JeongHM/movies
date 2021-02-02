@@ -1,0 +1,12 @@
+version: "3"
+services:
+  application:
+    container_name: movie-application
+    build:
+      context: .
+      dockerfile: dockerfiles/application.dockerfile
+    volumes:
+      - ./:/home
+    ports:
+      - "5050:5050"
+    command: sh -c "FLASK_APP=src/application.py FLASK_DEBUG=1 flask run --port 5050 --host 0.0.0.0"

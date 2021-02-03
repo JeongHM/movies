@@ -26,7 +26,7 @@ class MoviesService(object):
             rows = MoviesModel().select_all_movies()
 
             if not rows:
-                return None, "NO_CONTENT", None, 204
+                return None, "NO_CONTENT", None, None, 204
 
             items = {"movies": [dict(row) for row in rows]}
 

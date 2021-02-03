@@ -116,3 +116,27 @@ class MoviesModel(object):
             row = query.fetchone()
 
         return row
+
+    def select_movie_by_name(self, names: list) -> list or object:
+        """
+        select movie id by name
+        :param names: movie name list
+        :return:
+        """
+
+        sql = "SELECT id FROM movies WHERE movies.name = :movie_name"
+        movie_ids = list()
+
+        with self._conn as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.cursor()
+
+            for name in names:
+                cursor.execute(sql, {"movie_name": name})
+                movie = cursor.fetchone()
+
+                if movie is None:
+                    raise ValueError("NoneType Error: movie.name")
+                movie_ids.append(dict(movie).get("id"))
+
+        return movie_ids

@@ -2,6 +2,7 @@ import sqlite3
 from flask import current_app, request
 
 from src.api.v1.models.movies import MoviesModel
+from src.api.v1.validators.movies import MovieSchema
 
 
 class MoviesService(object):
@@ -38,9 +39,9 @@ class MoviesService(object):
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e, 400
+            return False, "BAD_REQUEST", e, None, 400
 
-        return True, "SUCCESS", items, 200
+        return True, "SUCCESS", items, links, 200
 
     def post_movie(self) -> (bool, str, str or list, int):
         """
@@ -50,6 +51,10 @@ class MoviesService(object):
         """
         try:
             item = {}
+
+            error = MovieSchema().validate(data=self._body)
+            if error:
+                raise ValueError("required: Missing data for required field.")
 
             last_id = MoviesModel().insert_movie(movie=self._body)
 
@@ -62,13 +67,13 @@ class MoviesService(object):
 
         except sqlite3.IntegrityError as e:
             current_app.logger.error(e)
-            return False, "CONFLICT", e, 409
+            return False, "CONFLICT", e, None, 409
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e, 400
+            return False, "BAD_REQUEST", e, None, 400
 
-        return True, "CREATED", item, 201
+        return True, "CREATED", item, links, 201
 
     def put_movie(self) -> (bool, str, str or list, int):
         """
@@ -76,8 +81,13 @@ class MoviesService(object):
             MoviesServices().put_movie()
         :return: result(bool), code(str), error or result object, status_code
         """
-        # TODO: validator, 202 (async)
         try:
+
+            error = MovieSchema(many=True).validate(data=self._body["movies"])
+
+            if error:
+                raise ValueError("required: Missing data for required field.")
+
             movies = self._body["movies"]
 
             movie_names = [movie.get("name") for movie in movies]
@@ -85,17 +95,26 @@ class MoviesService(object):
             if len(movie_names) != len(set(movie_names)):
                 raise KeyError('Duplicate Key Error: movie.name')
 
+            movie_ids = MoviesModel().select_movie_by_name(names=movie_names)
+
             MoviesModel().update_movies(movies=movies)
+
+            links = [
+                {
+                    "rel": "self",
+                    "href": request.url + "/" + str(movie_id)
+                } for movie_id in movie_ids
+            ]
 
         except KeyError as e:
             current_app.logger.error(e)
-            return False, "CONFLICT", e, 409
+            return False, "CONFLICT", e, None, 409
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e, 400
+            return False, "BAD_REQUEST", e, None, 400
 
-        return True, "SUCCESS", None, 200
+        return True, "SUCCESS", None, links, 200
 
     def delete_movie(self) -> (bool, str, str or list, int):
         """
@@ -108,9 +127,9 @@ class MoviesService(object):
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e, 400
+            return False, "BAD_REQUEST", e, None, 400
 
-        return True, "NO_CONTENT", None, 204
+        return True, "NO_CONTENT", None, None, 204
 
     def get_specific_movie(self) -> (bool, str, str or list, int):
         """
@@ -123,12 +142,12 @@ class MoviesService(object):
             row = MoviesModel().select_movie_by_id(param=self._param)
 
             if not row:
-                return None, "NO_CONTENT", None, 204
+                return None, "NO_CONTENT", None, None, 204
 
             item = {"movie": dict(row)}
 
         except Exception as e:
             current_app.logger.error(e)
-            return False, "BAD_REQUEST", e, 400
+            return False, "BAD_REQUEST", e, None, 400
 
-        return True, "SUCCESS", item, 200
+        return True, "SUCCESS", item, None, 200

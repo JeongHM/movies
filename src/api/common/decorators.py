@@ -5,12 +5,13 @@ from flask import Response
 
 def response_object_formatting(func):
     def wrapper(*args, **kwargs):
-        res, result, errors, status = func(*args, **kwargs)
+        res, result, errors, links, status = func(*args, **kwargs)
 
-        if result or errors:
+        if result or errors or links:
             res_copy = deepcopy(res)
             res_copy["result"] = result if result else {}
             res_copy["errors"] = errors if errors else []
+            res_copy["links"] = links if links else []
 
             if errors:
                 error = {

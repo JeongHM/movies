@@ -1,8 +1,7 @@
 import sqlite3
 from flask import current_app, request
 
-
-from src.api.v1.models import connection
+from src.api.v1.models.movies import MoviesModel
 
 
 class MoviesService(object):
@@ -15,7 +14,6 @@ class MoviesService(object):
         """
         self._param = param
         self._body = body
-        self._connection = connection()
 
     def get_all_movies(self) -> (bool, str, str or list, int):
         """
@@ -24,28 +22,19 @@ class MoviesService(object):
         :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            sql = "SELECT * FROM movies"
-            items = {"movies": None}
+            rows = MoviesModel().select_all_movies()
 
-            with self._connection as conn:
-                conn.row_factory = sqlite3.Row
-                cursor = conn.cursor()
-                query = cursor.execute(sql)
+            if not rows:
+                return None, "NO_CONTENT", None, 204
 
-                movies = list()
+            items = {"movies": [dict(row) for row in rows]}
 
-                for row in query.fetchall():
-                    movie = dict(row)
-                    movie["link"] = {
-                        "rel": "self",
-                        "href": request.url + "/" + str(movie.get("id"))
-                    }
-
-                    movies.append(movie)
-                items["movies"] = movies
-
-                if not items["movies"]:
-                    return None, "NO_CONTENT", None, 204
+            links = [
+                {
+                    "rel": "self",
+                    "href": request.url + "/" + str(dict(row).get("id"))
+                } for row in rows
+            ]
 
         except Exception as e:
             current_app.logger.error(e)
@@ -60,20 +49,16 @@ class MoviesService(object):
         :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            sql = "INSERT INTO movies (name, genre, grade, release_at, views) " \
-                  "VALUES (:name, :genre, :grade, :release_at, :views)"
+            item = {}
 
-            with self._connection as conn:
-                cursor = conn.cursor()
-                cursor.execute(sql, self._body)
+            last_id = MoviesModel().insert_movie(movie=self._body)
 
-                item = {
-                    "link": {
-                        "rel": "self",
-                        "href": request.url + "/" + str(cursor.lastrowid)
-                    }
+            links = [
+                {
+                    "rel": "self",
+                    "href": request.url + "/" + str(last_id)
                 }
-                conn.commit()
+            ]
 
         except sqlite3.IntegrityError as e:
             current_app.logger.error(e)
@@ -83,7 +68,7 @@ class MoviesService(object):
             current_app.logger.error(e)
             return False, "BAD_REQUEST", e, 400
 
-        return True, "SUCCESS", item, 200
+        return True, "CREATED", item, 201
 
     def put_movie(self) -> (bool, str, str or list, int):
         """
@@ -91,12 +76,8 @@ class MoviesService(object):
             MoviesServices().put_movie()
         :return: result(bool), code(str), error or result object, status_code
         """
+        # TODO: validator, 202 (async)
         try:
-            sql = "UPDATE movies " \
-                  "SET genre = :genre, grade = :grade, release_at = " \
-                  ":release_at, views = :views " \
-                  "WHERE name = :name;"
-
             movies = self._body["movies"]
 
             movie_names = [movie.get("name") for movie in movies]
@@ -104,13 +85,7 @@ class MoviesService(object):
             if len(movie_names) != len(set(movie_names)):
                 raise KeyError('Duplicate Key Error: movie.name')
 
-            with self._connection as conn:
-                cursor = conn.cursor()
-
-                for movie in movies:
-                    cursor.execute(sql, movie)
-
-            conn.commit()
+            MoviesModel().update_movies(movies=movies)
 
         except KeyError as e:
             current_app.logger.error(e)
@@ -129,19 +104,13 @@ class MoviesService(object):
         :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            sql = "DELETE FROM movies"
-
-            with self._connection as conn:
-                cursor = conn.cursor()
-                cursor.execute(sql)
-
-                conn.commit()
+            MoviesModel().delete_movies()
 
         except Exception as e:
             current_app.logger.error(e)
             return False, "BAD_REQUEST", e, 400
 
-        return True, "SUCCESS", None, 200
+        return True, "NO_CONTENT", None, 204
 
     def get_specific_movie(self) -> (bool, str, str or list, int):
         """
@@ -150,19 +119,13 @@ class MoviesService(object):
         :return: result(bool), code(str), error or result object, status_code
         """
         try:
-            sql = "SELECT * FROM movies WHERE movies.id = :movie_id"
 
-            with self._connection as conn:
-                conn.row_factory = sqlite3.Row
-                cursor = conn.cursor()
+            row = MoviesModel().select_movie_by_id(param=self._param)
 
-                query = cursor.execute(sql, self._param)
-                row = query.fetchone()
+            if not row:
+                return None, "NO_CONTENT", None, 204
 
-                if not row:
-                    return None, "NO_CONTENT", None, 204
-
-                item = {"movie": dict(row)}
+            item = {"movie": dict(row)}
 
         except Exception as e:
             current_app.logger.error(e)

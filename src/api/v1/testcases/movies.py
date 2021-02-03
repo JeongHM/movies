@@ -75,7 +75,7 @@ class MoviesControllerTest(unittest.TestCase):
         delete_req = self.request_delete(path=CONSTANTS["V1_MOVIE_API"])
         status_code = delete_req.status_code
 
-        self.assertEqual(200, status_code)
+        self.assertEqual(204, status_code)
 
         # create movie data
         self.request_post(data=self._movie_data, path=CONSTANTS["V1_MOVIE_API"])
@@ -97,7 +97,7 @@ class MoviesControllerTest(unittest.TestCase):
         delete_req = self.request_delete(path=CONSTANTS["V1_MOVIE_API"])
         status_code = delete_req.status_code
 
-        self.assertEqual(200, status_code)
+        self.assertEqual(204, status_code)
 
         get_req = self.request_get(path=CONSTANTS["V1_MOVIE_API"])
         status_code = get_req.status_code
@@ -115,7 +115,7 @@ class MoviesControllerTest(unittest.TestCase):
                                      path=CONSTANTS["V1_MOVIE_API"])
         post_status_code = post_req.status_code
 
-        self.assertEqual(200, post_status_code)
+        self.assertEqual(201, post_status_code)
 
         req = self.request_get(path=CONSTANTS["V1_MOVIE_API"])
         resp = req.json()
@@ -123,7 +123,7 @@ class MoviesControllerTest(unittest.TestCase):
         last_movie = resp["result"]["movies"][-1]
         del last_movie["id"]
         del last_movie["created_at"]
-        del last_movie["link"]
+        # del last_movie["link"]
 
         self.assertEqual(self._movie_data, last_movie)
 
@@ -178,7 +178,7 @@ class MoviesControllerTest(unittest.TestCase):
         delete_req = self.request_delete(path=CONSTANTS["V1_MOVIE_API"])
         status_code = delete_req.status_code
 
-        self.assertEqual(200, status_code)
+        self.assertEqual(204, status_code)
 
         get_req = self.request_get(path=CONSTANTS["V1_MOVIE_API"])
         status_code = get_req.status_code

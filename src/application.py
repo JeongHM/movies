@@ -70,19 +70,19 @@ def before_request():
 @application.errorhandler(404)
 @response_object_formatting
 def not_found_error(e):
-    return RESPONSE_CODE["NOT_FOUND"], None, e, 404
+    return RESPONSE_CODE["NOT_FOUND"], None, e, None, 404
 
 
 @application.errorhandler(405)
 @response_object_formatting
 def method_not_allow(e):
-    return RESPONSE_CODE["NOT_ALLOW"], None, e, 405
+    return RESPONSE_CODE["NOT_ALLOW"], None, e, None, 405
 
 
 @application.errorhandler(406)
 @response_object_formatting
 def method_not_allow(e):
-    return RESPONSE_CODE["NOT_ACCEPT"], None, e, 406
+    return RESPONSE_CODE["NOT_ACCEPT"], None, e, None, 406
 
 
 if __name__ == '__main__':

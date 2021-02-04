@@ -117,6 +117,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "406": {
+            "$ref": "#/components/responses/NotAccept"
+          },
           "409": {
             "$ref": "#/components/responses/Conflict"
           }
@@ -150,14 +153,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "success"
-          },
           "204": {
             "$ref": "#/components/responses/Empty"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/NotAllow"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAccept"
           }
         }
       }
@@ -203,9 +209,21 @@
             "example": {}
           },
           "errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/error"
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "user_message": {
+                    "type": "string",
+                    "example": "404 Not Found"
+                  },
+                  "internal_message": {
+                    "type": "string",
+                    "example": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+                  }
+                }
+              }
             }
           }
         }
@@ -222,9 +240,21 @@
             "example": {}
           },
           "errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/error"
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "user_message": {
+                    "type": "string",
+                    "example": "UNIQUE constraint failed"
+                  },
+                  "internal_message": {
+                    "type": "string",
+                    "example": "movies.name"
+                  }
+                }
+              }
             }
           }
         }
@@ -241,9 +271,52 @@
             "example": {}
           },
           "errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/error"
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "user_message": {
+                    "type": "string",
+                    "example": "405 Method Not Allowed"
+                  },
+                  "internal_message": {
+                    "type": "string",
+                    "example": "The method is not allowed for the requested URL."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotAccpet": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Not Accept"
+          },
+          "result": {
+            "type": "object",
+            "example": {}
+          },
+          "errors": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "user_message": {
+                    "type": "string",
+                    "example": "406 Not Acceptable"
+                  },
+                  "internal_message": {
+                    "type": "string",
+                    "example": "The resource identified by the request is only capable of generating response entities which have content characteristics not acceptable according to the accept headers sent in the request."
+                  }
+                }
+              }
             }
           }
         }
@@ -370,6 +443,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/NotAllow"
+            }
+          }
+        }
+      },
+      "NotAccept": {
+        "description": "The HyperText Transfer Protocol (HTTP) 406 Not Acceptable client error response code indicates that the server cannot produce a response matching the list of acceptable values defined in the request's proactive content negotiation headers, and that the server is unwilling to supply a default representation..",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotAccpet"
             }
           }
         }

@@ -58,11 +58,20 @@
 2. Start Application, Swagger
     1. Docker-compose 로 실행하지 않는 경우
         ```shell script
-        # application 실행 [path: <your_path>/movies] 
-        $ FLASK_APP=src/application.py port=5050 flask run --port 5050
+        # [path: <your_path>/movies] 
+        # 1. 패키지를 설치합니다.
+        $ pip3 install -r src/requirements.txt 
        
+        # 2. 어플리케이션을 실행합니다
+        $ FLASK_APP=src/application.py port=5050 flask run --port 5050
+        ```
+       
+        ```shell script
         # swagger 실행 [path: <your_path>/movies/swagger]
+        # 1. 패키지를 설치합니다.
+       
         $ npm install
+        # swagger 실행
         $ node index.js
         ```
        
@@ -95,12 +104,13 @@
         1. 어플리케이션을 실행시켜줍니다. (3번 참고)
         2. 아래 명령어를 실행시켜줍니다.
         ```shell script
+        # [path: <your_path>/movies]
         $ python3 -m unittest src/api/v1/testcases/movies.py
         
         ..........
         ----------------------------------------------------------------------
         Ran 10 tests in 0.226s
 
-        OK  
+        OK
         ```
         
